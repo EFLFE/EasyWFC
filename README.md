@@ -6,6 +6,10 @@ If you want a deep explanation of the idea behind the algorithm, check out the o
 
 I should note that I wrote this code from scratch instead of rewriting the original project, so while I think my approach is correct, it may differ significantly from the original. I tried reverse-engineering the algorithm based on the readme, the included GIFs, and the comments people have made about it.
 
+## EFLFE's edition
+
+Corrected the interface and move rendered the image generation to a pool threading.
+
 ## Purpose
 
 The main goals of this project are:

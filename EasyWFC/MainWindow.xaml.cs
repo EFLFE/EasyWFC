@@ -12,7 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-
+using System.Threading;
 
 namespace QM2D
 {
@@ -34,7 +34,7 @@ namespace QM2D
             initializing = true;
 
             mySettings = new AppSettings(SettingsFileName);
-            
+
             InitializeComponent();
 
             //Load the input image.
@@ -57,13 +57,30 @@ namespace QM2D
             Check_MirrorInput.IsChecked = mySettings.MirrorInput;
             Check_RotateInput.IsChecked = mySettings.RotateInput;
 
-			//Disable the "Generate" button until an input image is chosen.
-			if (Img_Input.Source == null)
-				Button_GenerateImg.IsEnabled = false;
+            checkSizeWarninig();
+
+            //Disable the "Generate" button until an input image is chosen.
+            if (Img_Input.Source == null)
+                Button_GenerateImg.IsEnabled = false;
+
+            Loaded += MainWindow_Loaded;
 
             initializing = false;
         }
 
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Button_GenerateSeed_Click(null, null);
+
+            var img = new Image
+            {
+                Stretch = Stretch.Uniform,
+                Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/Resources/dice.png"))
+            };
+            var grid = new Grid();
+            grid.Children.Add(img);
+            Button_GenerateSeed.Content = img;
+        }
 
         protected override void OnClosed(EventArgs e)
         {
@@ -100,7 +117,7 @@ namespace QM2D
                 Img_Input.Source = inputBmp;
                 Img_Input.Stretch = Stretch.Uniform;
 
-				Button_GenerateImg.IsEnabled = true;
+                Button_GenerateImg.IsEnabled = true;
             }
         }
 
@@ -117,27 +134,57 @@ namespace QM2D
             if (initializing)
                 return;
 
-            int i;
-            if (int.TryParse(Textbox_TileWidth.Text, out i))
+            if (int.TryParse(Textbox_TileWidth.Text, out int i) && i > 1)
+            {
                 mySettings.TileSizeX = i;
+                checkSizeWarninig();
+            }
+            else
+            {
+                Textbox_TileWidth.Text = mySettings.TileSizeX.ToString();
+            }
         }
         private void Textbox_TileHeight_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (initializing)
                 return;
 
-            int i;
-            if (int.TryParse(Textbox_TileHeight.Text, out i))
+            if (int.TryParse(Textbox_TileHeight.Text, out int i) && i > 1)
+            {
                 mySettings.TileSizeY = i;
+                checkSizeWarninig();
+            }
+            else
+            {
+                Textbox_TileHeight.Text = mySettings.TileSizeY.ToString();
+            }
         }
-        
+        private void checkSizeWarninig()
+        {
+            if (mySettings.TileSizeX > 15 || mySettings.TileSizeY > 15)
+            {
+                sizeWarninig2.Visibility = Visibility.Visible;
+                sizeWarninig.Visibility = Visibility.Hidden;
+            }
+            else if (mySettings.TileSizeX > 5 || mySettings.TileSizeY > 5)
+            {
+                sizeWarninig.Visibility = Visibility.Visible;
+                sizeWarninig2.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                sizeWarninig.Visibility = Visibility.Hidden;
+                sizeWarninig2.Visibility = Visibility.Hidden;
+            }
+        }
+
         private void Button_LoadInputFile_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog();
-			if (openFileDialog.InitialDirectory == "")
-				openFileDialog.InitialDirectory = Environment.CurrentDirectory;
+            if (openFileDialog.InitialDirectory == "")
+                openFileDialog.InitialDirectory = Environment.CurrentDirectory;
 
-            var result = openFileDialog.ShowDialog();
+            bool? result = openFileDialog.ShowDialog();
 
             if (result == true && File.Exists(openFileDialog.FileName))
                 SetInputImage(openFileDialog.FileName);
@@ -148,16 +195,19 @@ namespace QM2D
             Textbox_Seed.Text = Guid.NewGuid().ToString();
         }
 
+        private GeneratorWindow wnd;
         private void Button_GenerateImg_Click(object sender, RoutedEventArgs e)
         {
-            var wnd = new GeneratorWindow();
-            wnd.Reset(256, 256, mySettings.Seed, inputBmp,
-                      mySettings.TileSizeX, mySettings.TileSizeY,
-                      Check_PeriodicInputX.IsChecked.Value,
-                      Check_PeriodicInputY.IsChecked.Value,
-                      Check_RotateInput.IsChecked.Value,
-                      Check_MirrorInput.IsChecked.Value);
-            wnd.Show();
+            wnd = new GeneratorWindow();
+            wnd.Reset(64, 64, mySettings.Seed, inputBmp,
+                     mySettings.TileSizeX, mySettings.TileSizeY,
+                     Check_PeriodicInputX.IsChecked.Value,
+                     Check_PeriodicInputY.IsChecked.Value,
+                     Check_RotateInput.IsChecked.Value,
+                     Check_MirrorInput.IsChecked.Value);
+            Hide();
+            wnd.ShowDialog();
+            Show();
         }
     }
 }

@@ -5,25 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QM2D"
         mc:Ignorable="d"
-        Title="GeneratorWindow" Height="500" Width="679.8">
+        Title="Generator"
+        Height="510" Width="690"
+        MinHeight="510" MinWidth="690"
+        MaxHeight="510" MaxWidth="690"
+        WindowStartupLocation="CenterScreen">
     <Canvas>
-        <Label x:Name="Label_Seed" Content="Seed:" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="179" Canvas.Top="6"/>
-        <Label x:Name="Readonly_Seed" Content="[seed here]" HorizontalAlignment="Left" VerticalAlignment="Top" Width="157" Canvas.Left="222" Canvas.Top="6"/>
-        <Button x:Name="Button_Step" Content="Step Forward" Height="31" Width="95" Canvas.Top="167" Canvas.Left="14" Click="Button_Step_Click"/>
+        <TextBlock Text="Seed:" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="179" Canvas.Top="6"/>
+        <TextBlock x:Name="Readonly_Seed" Text="[seed here]" HorizontalAlignment="Left" VerticalAlignment="Top" Width="437" Canvas.Left="222" Canvas.Top="6"/>
+        <Button x:Name="Button_Step" Content="Start" Height="25" Width="95" Canvas.Top="173" Canvas.Left="14" Click="Button_Step_Click"/>
         <Image x:Name="Img_Output" Width="437" Height="422" Canvas.Left="222" Canvas.Top="40" Stretch="Fill" />
-        <Button x:Name="Button_Reset" Content="Reset" Height="32" Width="95" Canvas.Top="167" Canvas.Left="122" Click="Button_Reset_Click"/>
+        <Button x:Name="Button_Reset" Content="Reset" Height="26" Width="95" Canvas.Top="173" Canvas.Left="122" Click="Button_Reset_Click"/>
         <Button x:Name="Button_SaveToFile" Content="Save to File" Height="31" Width="95" Canvas.Top="425" Canvas.Left="67" Click="Button_SaveToFile_Click"/>
         <Image x:Name="Img_Input" Height="156" Canvas.Left="34" Canvas.Top="244" Width="156"/>
-        <Label x:Name="Label_SizeDelimiter" Content="x" HorizontalAlignment="Left" VerticalAlignment="Top" Width="16" Canvas.Left="456" Canvas.Top="7"/>
-        <TextBox x:Name="Textbox_OutputWidth" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="128" VerticalAlignment="Top" Width="46" TextChanged="Textbox_OutputWidth_TextChanged" Canvas.Left="406" Canvas.Top="8"/>
-        <TextBox x:Name="Textbox_OutputHeight" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="128" VerticalAlignment="Top" Width="49" TextChanged="Textbox_OutputHeight_TextChanged" Canvas.Left="478" Canvas.Top="7"/>
+        <Label x:Name="Label_SizeDelimiter" Content="x" HorizontalAlignment="Left" VerticalAlignment="Top" Width="16" Canvas.Left="118" Canvas.Top="113" FontFamily="Consolas" FontWeight="Bold"/>
+        <TextBox x:Name="Textbox_OutputWidth" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="128" VerticalAlignment="Top" Width="46" TextChanged="Textbox_OutputWidth_TextChanged" Canvas.Left="68" Canvas.Top="114"/>
+        <TextBox x:Name="Textbox_OutputHeight" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="128" VerticalAlignment="Top" Width="49" TextChanged="Textbox_OutputHeight_TextChanged" Canvas.Left="140" Canvas.Top="113"/>
         <Label x:Name="Label_Failed" Content="Failed at: 40, 54" Canvas.Left="67" Canvas.Top="400"/>
-        <CheckBox x:Name="Check_PeriodicOutputX" Content="Periodic Output X?" Canvas.Left="18" Canvas.Top="18" Unchecked="Check_PeriodicOutputX_Checked" Checked="Check_PeriodicOutputX_Checked"/>
-        <CheckBox x:Name="Check_PeriodicOutputY" Content="Periodic Output Y?" Canvas.Left="18" Canvas.Top="34" Unchecked="Check_PeriodicOutputY_Checked" Checked="Check_PeriodicOutputY_Checked"/>
-        <TextBox x:Name="Textbox_ViolationClearSize" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="25" TextChanged="Textbox_ViolationClearSize_TextChanged" Canvas.Left="133" Canvas.Top="77"/>
-        <Label x:Name="Label_ViolationClearSize" Content="Violation Clear Size:" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="15" Canvas.Top="74"/>
-        <CheckBox x:Name="Check_VisualizePixels" Content="Visualize Unset Pixels" Canvas.Left="18" Canvas.Top="114" IsChecked="True" Unchecked="Check_VisualizePixels_Checked" Checked="Check_VisualizePixels_Checked"/>
-        <Label x:Name="Label_StepIncrement" Content="Step Increment:" Canvas.Left="34" Canvas.Top="204"/>
-        <TextBox x:Name="Textbox_StepIncrement" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="25" TextChanged="Textbox_StepIncrement_TextChanged" Canvas.Left="133" Canvas.Top="206"/>
+        <CheckBox x:Name="Check_PeriodicOutputX" Content="Periodic Output X" Canvas.Left="18" Canvas.Top="18" Unchecked="Check_PeriodicOutputX_Checked" Checked="Check_PeriodicOutputX_Checked"/>
+        <CheckBox x:Name="Check_PeriodicOutputY" Content="Periodic Output Y" Canvas.Left="18" Canvas.Top="34" Unchecked="Check_PeriodicOutputY_Checked" Checked="Check_PeriodicOutputY_Checked"/>
+        <TextBox x:Name="Textbox_ViolationClearSize" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="25" TextChanged="Textbox_ViolationClearSize_TextChanged" Canvas.Left="134" Canvas.Top="59"/>
+        <Label x:Name="Label_ViolationClearSize" Content="Violation Clear Size:" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="16" Canvas.Top="56"/>
+        <CheckBox x:Name="Check_VisualizePixels" Content="Visualize Unset Pixels" Canvas.Left="18" Canvas.Top="89" IsChecked="True" Unchecked="Check_VisualizePixels_Checked" Checked="Check_VisualizePixels_Checked"/>
+        <Label x:Name="Label_StepIncrement" Content="Steps:" Canvas.Left="10" Canvas.Top="204"/>
+        <TextBox x:Name="Textbox_StepIncrement" MaxLength="6" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="70" TextChanged="Textbox_StepIncrement_TextChanged" Canvas.Left="56" Canvas.Top="207"/>
+        <Label x:Name="Label_status" Content="0/0" Canvas.Left="131" Canvas.Top="207" FontFamily="Consolas"/>
+        <TextBlock Text="Out size:" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="14" Canvas.Top="116"/>
+        <CheckBox x:Name="infinityLoopFlag" Content="Infinity" Canvas.Left="16" Canvas.Top="152" ToolTip="Infinity steps" Checked="infinityLoopFlag_Checked" Unchecked="infinityLoopFlag_Unchecked"/>
     </Canvas>
 </Window>

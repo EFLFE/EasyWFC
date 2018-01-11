@@ -4,21 +4,25 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QM2D"
-        mc:Ignorable="d" Height="399.282" Width="435.282" Title="Main Window" ResizeMode="CanMinimize">
+        mc:Ignorable="d" Height="416" Width="570"
+        MinHeight="416" MinWidth="570"
+        Title="EasyWFC" WindowStartupLocation="CenterScreen">
     <Grid>
-        <Image x:Name="Img_Input" HorizontalAlignment="Right" Height="216" Margin="0,144,9.8,0" VerticalAlignment="Top" Width="198"/>
-        <Button x:Name="Button_LoadInputFile" Content="Load Input File" HorizontalAlignment="Left" Height="36" Margin="12,324,0,0" VerticalAlignment="Top" Width="181" Click="Button_LoadInputFile_Click"/>
-        <Label x:Name="Label_TileSize" Content="Tile Size:" HorizontalAlignment="Left" Margin="12,276,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="Label_SizeDelimiter" Content="x" HorizontalAlignment="Left" Margin="123,277,0,0" VerticalAlignment="Top" Width="16"/>
-        <TextBox x:Name="Textbox_TileWidth" HorizontalAlignment="Left" Height="23" Margin="68,279,0,0" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="46" TextChanged="Textbox_TileWidth_TextChanged"/>
-        <TextBox x:Name="Textbox_TileHeight" HorizontalAlignment="Left" Height="23" Margin="144,279,0,0" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="49" TextChanged="Textbox_TileHeight_TextChanged"/>
-        <TextBox x:Name="Textbox_Seed" HorizontalAlignment="Left" Height="23" Margin="55,89,0,0" TextWrapping="Wrap" Text="abc123" VerticalAlignment="Top" Width="162" TextChanged="Textbox_Seed_TextChanged"/>
-        <Label x:Name="Label_Seed" Content="Seed:" HorizontalAlignment="Left" Margin="12,86,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="Button_GenerateImg" Content="Generate Image" HorizontalAlignment="Left" Margin="10,11,0,0" VerticalAlignment="Top" Width="398" Height="41" Click="Button_GenerateImg_Click"/>
-        <Button x:Name="Button_GenerateSeed" Content="Generate New Seed" HorizontalAlignment="Left" Margin="222,84,0,0" VerticalAlignment="Top" Width="188" Height="32" Click="Button_GenerateSeed_Click"/>
-        <CheckBox x:Name="Check_PeriodicInputX" Content="Periodic Input X?" HorizontalAlignment="Left" Margin="22,167,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="Check_PeriodicInputY" Content="Periodic Input Y?" HorizontalAlignment="Left" Margin="22,188,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="Check_MirrorInput" Content="Mirror Input?" HorizontalAlignment="Left" Margin="22,218,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="Check_RotateInput" Content="Rotate Input?" HorizontalAlignment="Left" Margin="22,239,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Image x:Name="Img_Input" Margin="10,115,10,10"/>
+        <Button x:Name="Button_LoadInputFile" Content="Load tileset image" HorizontalAlignment="Left" Height="24" Margin="10,86,0,0" VerticalAlignment="Top" Width="131" Click="Button_LoadInputFile_Click"/>
+        <Label x:Name="Label_TileSize" Content="Tile Size:" HorizontalAlignment="Left" Margin="318,52,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="Label_SizeDelimiter" Content="x" HorizontalAlignment="Left" Margin="425,54,0,0" VerticalAlignment="Top" Width="16" FontWeight="Bold" FontFamily="Consolas"/>
+        <TextBox x:Name="Textbox_TileWidth" HorizontalAlignment="Left" Height="23" Margin="374,56,0,0" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="46" TextChanged="Textbox_TileWidth_TextChanged"/>
+        <TextBox x:Name="Textbox_TileHeight" HorizontalAlignment="Left" Height="23" Margin="446,56,0,0" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="49" TextChanged="Textbox_TileHeight_TextChanged"/>
+        <TextBox x:Name="Textbox_Seed" HorizontalAlignment="Left" Height="48" Margin="49,12,0,0" TextWrapping="Wrap" Text="9DDDE67B-4BFB-4BE0-B58B-9E345CF112DD" VerticalAlignment="Top" Width="250" TextChanged="Textbox_Seed_TextChanged" FontFamily="Consolas"/>
+        <TextBlock x:Name="Label_Seed" Text=" Seed:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="34"/>
+        <Button x:Name="Button_GenerateImg" Content="Generate Image" HorizontalAlignment="Left" Margin="161,86,0,0" Width="121" Click="Button_GenerateImg_Click" Height="24" VerticalAlignment="Top"/>
+        <Button x:Name="Button_GenerateSeed" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Width="32" Height="32" Click="Button_GenerateSeed_Click"/>
+        <CheckBox x:Name="Check_PeriodicInputX" Content="Periodic Input X" HorizontalAlignment="Left" Margin="322,10,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <CheckBox x:Name="Check_PeriodicInputY" Content="Periodic Input Y" HorizontalAlignment="Left" Margin="323,31,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <CheckBox x:Name="Check_MirrorInput" Content="Mirror Input" HorizontalAlignment="Left" Margin="444,10,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <CheckBox x:Name="Check_RotateInput" Content="Rotate Input" HorizontalAlignment="Left" Margin="444,31,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <TextBlock x:Name="sizeWarninig" Visibility="Hidden" HorizontalAlignment="Left" Margin="323,84,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="11" TextDecorations="{x:Null}" FontWeight="Bold"><Run Text="Warning: Tile Size is too large!"/><LineBreak/><Run Text="The image can be generated for a long time."/></TextBlock>
+        <TextBlock x:Name="sizeWarninig2" HorizontalAlignment="Left" Margin="323,84,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="11" TextDecorations="Underline" FontWeight="Bold"><Run Text="Warning: Critical size!"/><LineBreak/><Run Text="You may not have enough patience."/></TextBlock>
     </Grid>
 </Window>

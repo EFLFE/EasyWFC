@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 using Vector2i = QM2D.Generator.Vector2i;
 
@@ -22,15 +16,14 @@ namespace QM2D
     /// </summary>
     public partial class GeneratorWindow : Window
     {
-		public static int HashSeed(string seed)
-		{
-			int hash;
-			if (!int.TryParse(seed, out hash))
-				hash = seed.GetHashCode();
-			return hash;
-		}
+        public static int HashSeed(string seed)
+        {
+            if (!int.TryParse(seed, out int hash))
+                hash = seed.GetHashCode();
+            return hash;
+        }
 
-
+        private static LoadingWindow loadingWindow;
         private Generator.State state;
         private BitmapSource outputImg;
 
@@ -41,11 +34,10 @@ namespace QM2D
         public GeneratorWindow()
         {
             InitializeComponent();
-            
             Label_Failed.Content = "";
         }
 
-
+        // in pool
         public void Reset(int outputWidth, int outputHeight, string seed,
                           BitmapImage input, int patternSizeX, int patternSizeY,
                           bool periodicInputX, bool periodicInputY,
@@ -61,7 +53,7 @@ namespace QM2D
 
             Color[,] inputPixelGrid = new Color[input.PixelWidth, input.PixelHeight];
             Utilities.Convert(input, ref inputPixelGrid);
-            
+
             state = new Generator.State(new Generator.Input(inputPixelGrid,
                                                             new Vector2i(patternSizeX, patternSizeY),
                                                             periodicInputX, periodicInputY,
@@ -71,10 +63,12 @@ namespace QM2D
                                         Check_PeriodicOutputX.IsChecked.Value,
                                         Check_PeriodicOutputY.IsChecked.Value,
                                         HashSeed(seed));
+
+            // apply
             Textbox_ViolationClearSize.Text = state.ViolationClearSize.ToString();
             Textbox_OutputWidth.Text = outputWidth.ToString();
             Textbox_OutputHeight.Text = outputHeight.ToString();
-            Readonly_Seed.Content = seed;
+            Readonly_Seed.Text = seed;
 
             UpdateOutputTex();
         }
@@ -93,65 +87,113 @@ namespace QM2D
             RenderOptions.SetBitmapScalingMode(Img_Output, BitmapScalingMode.NearestNeighbor);
         }
 
+        private bool isInfinityLoop;
+        private bool breakPool, poolIsOn;
+        private static object lockPool = new object();
 
         private void Button_Step_Click(object sender, RoutedEventArgs e)
         {
-            HashSet<Vector2i> failPoses = null;
-            state.UpdateVisualizationAfterIteration = visualizeUnsetPixels;
-            for (int i = 0; i < stepIncrement; ++i)
+            if (poolIsOn)
             {
-                var status = state.Iterate(ref failPoses);
-
-                if (status.HasValue)
-                {
-                    Button_Step.IsEnabled = false;
-
-                    if (!status.Value)
-                    {
-                        Vector2i failPos = failPoses.First();
-                        Label_Failed.Content = "Failed at: " + failPos.x + "," + failPos.y;
-                    }
-
-                    break;
-                }
-                else if (false)
-                {
-                    //See if the constraints got violated somehow.
-                    //If they did, make this obvious by modifying the color of positions that violate it.
-                    var outputPixelGetter = state.OutputPixelGetter;
-                    var outputColorGetter = state.OutputColorGetter;
-                    HashSet<Vector2i> toClear = new HashSet<Vector2i>();
-                    foreach (Vector2i pos in new Vector2i.Iterator(-state.Input.MaxPatternSize,
-                                                                   state.Output.SizeXY()))
-                    {
-                        Vector2i v = pos;
-                        if (!state.Input.Patterns.Any(patt => patt.DoesFit(pos, outputColorGetter)))
-                            toClear.Add(pos);
-                    }
-                    foreach (Vector2i posToClear in toClear)
-                    {
-                        var pixel = outputPixelGetter(posToClear);
-                        if (pixel != null)
-                        {
-                            Color? oldVal = pixel.FinalValue;
-                            Color newVal = (oldVal.HasValue ?
-                                                Color.FromRgb(oldVal.Value.R, 100, oldVal.Value.B) :
-                                                Color.FromRgb(0, 255, 0));
-                            pixel.FinalValue = newVal;
-                            pixel.VisualizedValue = newVal;
-                        }
-                    }
-                }
+                // stop
+                Button_Step.Content = "Stop...";
+                Button_Step.IsEnabled = false;
+                breakPool = true;
+                return;
             }
 
-            UpdateOutputTex();
+            poolIsOn = true;
+            breakPool = false;
+            // disable
+            Button_Step.Content = "Stop";
+            infinityLoopFlag.IsEnabled = false;
+            Button_SaveToFile.IsEnabled = false;
+            Textbox_StepIncrement.IsReadOnly = true;
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(stepPool), null);
         }
+
+        private void stepPool(object _)
+        {
+            try
+            {
+                HashSet<Vector2i> failPoses = null;
+                state.UpdateVisualizationAfterIteration = visualizeUnsetPixels;
+                for (int i = 0; isInfinityLoop || i < stepIncrement; ++i)
+                {
+                    if (breakPool)
+                        break;
+
+                    bool? status = state.Iterate(ref failPoses);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (breakPool)
+                            return;
+
+                        lock (lockPool)
+                        {
+                            UpdateOutputTex();
+                            if (isInfinityLoop)
+                                Label_status.Content = $"{i + 1}";
+                            else
+                                Label_status.Content = $"{i + 1} / {stepIncrement}";
+                        }
+                    });
+
+                    if (breakPool)
+                        break;
+
+                    if (status.HasValue)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            Button_Step.IsEnabled = false;
+
+                            if (!status.Value)
+                            {
+                                Vector2i failPos = failPoses.First();
+                                Label_Failed.Content = "Failed at: " + failPos.x + "," + failPos.y;
+                            }
+                        });
+
+                        break;
+                    }
+                }
+
+                Dispatcher.Invoke(() => UpdateOutputTex());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    // enable
+                    Button_Step.IsEnabled = true;
+                    Button_Step.Content = "Start";
+                    infinityLoopFlag.IsEnabled = true;
+                    Button_SaveToFile.IsEnabled = true;
+                    Textbox_StepIncrement.IsReadOnly = false;
+                });
+                poolIsOn = false;
+            }
+        }
+
         private void Button_Reset_Click(object sender, RoutedEventArgs e)
         {
-            Label_Failed.Content = "";
-            state.Reset(null, HashSeed(Readonly_Seed.Content.ToString()));
-            UpdateOutputTex();
-            
+            breakPool = true;
+
+            lock (lockPool)
+            {
+                Label_Failed.Content = string.Empty;
+                Label_status.Content = string.Empty;
+                state.Reset(null, HashSeed(Readonly_Seed.Text));
+                UpdateOutputTex();
+            }
+
             Button_Step.IsEnabled = true;
         }
 
@@ -164,7 +206,7 @@ namespace QM2D
             saveFileDialog.Filter = "Image files|*.png;*.jpg;*.jpeg;*.bmp";
             saveFileDialog.FilterIndex = 0;
 
-            var result = saveFileDialog.ShowDialog();
+            bool? result = saveFileDialog.ShowDialog();
             if (result == true)
             {
                 string err = Utilities.ToFile((BitmapSource)Img_Output.Source,
@@ -175,17 +217,16 @@ namespace QM2D
                 }
             }
         }
-        
+
         private void Textbox_OutputWidth_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (state == null)
                 return;
 
-            int i;
-            if (int.TryParse(Textbox_OutputWidth.Text, out i) && i > 7)
+            if (int.TryParse(Textbox_OutputWidth.Text, out int i) && i > 7)
             {
                 state.Reset(new Vector2i(i, state.Output.SizeY()),
-                            HashSeed(Readonly_Seed.Content.ToString()));
+                            HashSeed(Readonly_Seed.Text));
                 UpdateOutputTex();
             }
         }
@@ -194,22 +235,20 @@ namespace QM2D
             if (state == null)
                 return;
 
-            int i;
-            if (int.TryParse(Textbox_OutputHeight.Text, out i) && i > 7)
+            if (int.TryParse(Textbox_OutputHeight.Text, out int i) && i > 7)
             {
                 state.Reset(new Vector2i(state.Output.SizeX(), i),
-                            HashSeed(Readonly_Seed.Content.ToString()));
+                            HashSeed(Readonly_Seed.Text));
                 UpdateOutputTex();
             }
         }
-        
+
         private void Textbox_ViolationClearSize_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (state == null)
                 return;
 
-            int i;
-            if (int.TryParse(Textbox_ViolationClearSize.Text, out i))
+            if (int.TryParse(Textbox_ViolationClearSize.Text, out int i))
                 state.ViolationClearSize = i;
         }
 
@@ -227,10 +266,23 @@ namespace QM2D
             state.PeriodicY = Check_PeriodicOutputY.IsChecked.Value;
         }
 
+        private void infinityLoopFlag_Checked(object sender, RoutedEventArgs e)
+        {
+            Label_StepIncrement.Visibility = Visibility.Hidden;
+            Textbox_StepIncrement.Visibility = Visibility.Hidden;
+            isInfinityLoop = true;
+        }
+
+        private void infinityLoopFlag_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Label_StepIncrement.Visibility = Visibility.Visible;
+            Textbox_StepIncrement.Visibility = Visibility.Visible;
+            isInfinityLoop = false;
+        }
+
         private void Textbox_StepIncrement_TextChanged(object sender, TextChangedEventArgs e)
         {
-            int i;
-            if (int.TryParse(Textbox_StepIncrement.Text, out i))
+            if (int.TryParse(Textbox_StepIncrement.Text, out int i) && i > 0)
                 stepIncrement = i;
         }
     }

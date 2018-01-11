@@ -24,7 +24,7 @@ namespace QM2D.Generator
             get { return Values.Get(pos); }
             set { Values.Set(pos, value); }
         }
-        
+
 
         /// <summary>
         /// Creates a pattern based on the given piece of the given input.

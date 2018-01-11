@@ -45,7 +45,7 @@ namespace QM2D.Generator
         public Dictionary<Color, uint> ColorFrequencies;
 
         private Color[,] data;
-        
+
 
         public Vector2i Size { get { return data.SizeXY(); } }
 
@@ -140,7 +140,7 @@ namespace QM2D.Generator
                 transformations.Add(Transforms.Rotate90CW);
                 transformations.Add(Transforms.Rotate270CW);
                 transformations.Add(Transforms.Rotate180);
-                
+
                 int maxPatternSize = Math.Max(OriginalPatternSize.x, OriginalPatternSize.y);
                 MaxPatternSize = new Vector2i(maxPatternSize, maxPatternSize);
             }
@@ -161,23 +161,30 @@ namespace QM2D.Generator
                 maxPatternMinCorner.x -= patternSize.x;
             if (!PeriodicY)
                 maxPatternMinCorner.y -= patternSize.y;
-            foreach (Vector2i patternMinCornerPos in new Vector2i.Iterator(maxPatternMinCorner + 1))
-                foreach (var transform in transformations)
-                    Patterns.Add(new Pattern(this, patternMinCornerPos, patternSize, transform));
 
-            //Remove identical patterns, using hashes to compare them quickly.
+            // long time loading [1]
+
+            foreach (Vector2i patternMinCornerPos in new Vector2i.Iterator(maxPatternMinCorner + 1))
+            {
+                foreach (Transforms transform in transformations)
+                {
+                    Patterns.Add(new Pattern(this, patternMinCornerPos, patternSize, transform));
+                }
+            }
+
+            // long time loading [2 and 3 (for)]
             List<int> patternHashes = Patterns.Select(p => p.GetHashCode()).ToList();
+
             for (int i = 0; i < Patterns.Count; ++i)
             {
-                var basePattern = Patterns[i];
+                Pattern basePattern = Patterns[i];
                 for (int j = i + 1; j < Patterns.Count; ++j)
                 {
-                    var patternToCheck = Patterns[j];
+                    Pattern patternToCheck = Patterns[j];
 
                     //If the patterns match, remove the second one.
                     if (patternHashes[i] == patternHashes[j] && basePattern.Equals(patternToCheck))
                     {
-                        //Increment the frequency of the original pattern.
                         Patterns[i] = new Pattern(Patterns[i].Values, Patterns[i].Frequency + 1);
 
                         Patterns.RemoveAt(j);
@@ -190,6 +197,7 @@ namespace QM2D.Generator
             //Compute the color frequencies.
             ColorFrequencies = new Dictionary<Color, uint>();
             foreach (Pattern pattern in Patterns)
+            {
                 foreach (Vector2i patternPos in pattern.Values.AllIndices())
                 {
                     Color patternColor = pattern.Values.Get(patternPos);
@@ -197,8 +205,9 @@ namespace QM2D.Generator
                         ColorFrequencies.Add(patternColor, 0);
                     ColorFrequencies[patternColor] += pattern.Frequency;
                 }
+            }
         }
-        
+
 
         public bool IsInside(Vector2i inputPos)
         {

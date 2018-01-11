@@ -39,7 +39,7 @@ namespace QM2D
 
                 if (line.Length == 0)
                     continue;
-                
+
                 string[] keyAndVal = line.Split('=');
                 if (keyAndVal.Length != 2)
                     throw new FileFormatException("The following line is malformed: " + line);
