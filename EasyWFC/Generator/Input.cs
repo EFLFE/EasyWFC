@@ -163,6 +163,7 @@ namespace QM2D.Generator
                 maxPatternMinCorner.y -= patternSize.y;
 
             // long time loading [1]
+            // (why toooo slow?!)
 
             foreach (Vector2i patternMinCornerPos in new Vector2i.Iterator(maxPatternMinCorner + 1))
             {

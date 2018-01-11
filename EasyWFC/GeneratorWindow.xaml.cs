@@ -37,7 +37,7 @@ namespace QM2D
             Label_Failed.Content = "";
         }
 
-        // in pool
+        // todo: move in pool
         public void Reset(int outputWidth, int outputHeight, string seed,
                           BitmapImage input, int patternSizeX, int patternSizeY,
                           bool periodicInputX, bool periodicInputY,

@@ -1,18 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Threading;
 
 namespace QM2D
 {
@@ -110,7 +101,7 @@ namespace QM2D
             string err = Utilities.FromFile(path, out inputBmp);
             if (err != null)
             {
-                System.Windows.MessageBox.Show(err, "Error loading input tex");
+                System.Windows.MessageBox.Show(err, "Error loading selected image");
             }
             else
             {
